@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-error NotAnOwner(address _addr);
-error InvalidPayAmount(uint _amount);
+error NotAnOwner(address addr);
+error InvalidPayAmount(uint amount);
 
-event ReceiverAlert(address _addr, uint timestamp, uint _value);
-event FallbackAlert(address _addr, uint timestamp, uint _value);
+event Pay(address addr, uint timestamp, uint amount);
+event Withdraw(address addr, address to, uint timestamp, uint amount);
+event Receive(address addr, string _str);
+event Fallback(address addr, string _str);
 
 contract SimplePay {
     constructor() {
@@ -35,6 +37,8 @@ contract SimplePay {
     
     function pay() public payable payAmount(msg.value) {
         payments[msg.sender].push(Payment(block.timestamp, msg.value));
+        emit Pay(msg.sender, block.timestamp, msg.value);
+
     }
 
     function showBalance() public view returns(uint) {
@@ -43,6 +47,8 @@ contract SimplePay {
     
     function withdraw(address payable _to) public onlyOwner(msg.sender) {
         _to.transfer(address(this).balance);
+        emit Withdraw(msg.sender, _to, block.timestamp, address(this).balance);
+
     }
 
     function showPayments(address _addr) public view onlyOwner(msg.sender) returns(Payment[] memory){
@@ -56,12 +62,12 @@ contract SimplePay {
     // --
 
     receive() external payable {
-        emit ReceiverAlert(msg.sender, block.timestamp, msg.value);
+        emit Receive(msg.sender, "*");
         pay();
     }
 
     fallback() external payable {
-        emit FallbackAlert(msg.sender, block.timestamp, msg.value);
+        emit Fallback(msg.sender, "*");
         pay();
     }
 }

@@ -1,8 +1,9 @@
 import { network } from 'hardhat';
-import { SIMPLE_PAY_ADDRESS } from '../../common/constants.js';
+import { SIMPLE_PAY_ADDRESS } from '../_CONST/constants.js';
+import { NETWORK } from '../_CONST/constants.js';
 
 async function main() {
-  const { ethers } = await network.connect({ network: 'localhost' });
+  const { ethers } = await network.connect({ network: NETWORK.localhost });
   const [_, acc2] = await ethers.getSigners();
 
   const contract = await ethers.getContractAt('SimplePay', SIMPLE_PAY_ADDRESS);

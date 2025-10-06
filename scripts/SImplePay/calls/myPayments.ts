@@ -1,8 +1,9 @@
 import { network } from 'hardhat';
-import { SIMPLE_PAY_ADDRESS } from '../../common/constants.js';
+import { SIMPLE_PAY_ADDRESS } from '../_CONST/constants.js';
+import { NETWORK } from '../_CONST/constants.js';
 
 async function main() {
-  const { ethers } = await network.connect({ network: 'localhost' });
+  const { ethers } = await network.connect({ network: NETWORK.localhost });
   const [signer, acc2] = await ethers.getSigners();
   const contract = await ethers.getContractAt('SimplePay', SIMPLE_PAY_ADDRESS);
 
@@ -19,9 +20,7 @@ async function main() {
       const date = new Date(Number(p.timestamp) * 1000).toLocaleString();
       let amount = ethers.formatEther(p.amount);
       console.log(`
-            # Payment №${i + 1}\n
-            Time: ${date}\n
-            Amount: ${amount} ETH
+            # Payment №${i + 1}\nTime: ${date}\nAmount: ${amount} ETH
             ---
             `);
       totalAmount += Number(amount);
@@ -30,12 +29,6 @@ async function main() {
   } else {
     console.log(`No payments for account: ${accountAddress}\n`);
   }
-
-  console.log(
-    `Account ${accountAddress} balance: ${ethers.formatEther(
-      accountBalance
-    )} ETH\n`
-  );
 }
 
 main().catch((err) => {

@@ -1,12 +1,12 @@
-import { SIMPLE_PAY_ADDRESS } from '../../common/constants.js';
+import { SIMPLE_PAY_ADDRESS } from '../_CONST/constants.js';
 import SimplePayABI from '../../../artifacts/contracts/SimplePay.sol/SimplePay.json';
 import { ethers } from 'ethers';
+import { WS } from '../_CONST/constants.js';
+import { EVENT } from '../_CONST/constants.js';
 
 async function main() {
-  // Подключаемся к реальному WebSocket Hardhat Node
-  const provider = new ethers.WebSocketProvider('ws://127.0.0.1:8545');
+  const provider = new ethers.WebSocketProvider(WS.localhost);
 
-  // Контракт на этом же провайдере
   const contract = new ethers.Contract(
     SIMPLE_PAY_ADDRESS,
     SimplePayABI.abi,
@@ -15,24 +15,27 @@ async function main() {
 
   console.log('Listening for events...');
 
-  // Слушаем событие ReceiverAlert
-  contract.on(
-    'ReceiverAlert',
-    (addr: string, timestamp: bigint, value: bigint) => {
-      console.log(
-        `ReceiverAlert: ${addr}, ${new Date(
-          Number(timestamp) * 1000
-        ).toLocaleString()}, ${ethers.formatEther(value)} ETH`
-      );
-    }
-  );
+  contract.on(EVENT.receive, (addr: string, _str: string) => {
+    console.log(`Receive: ${addr}, ${_str}`);
+  });
 
-  // Слушаем событие FallbackAlert
+  contract.on(EVENT.fallback, (addr: string, _str: string) => {
+    console.log(`Fallback: ${addr}, ${_str}`);
+  });
+
+  contract.on(EVENT.pay, (addr: string, timestamp: bigint, value: bigint) => {
+    console.log(
+      `Pay: ${addr}, ${new Date(
+        Number(timestamp) * 1000
+      ).toLocaleString()}, ${ethers.formatEther(value)} ETH`
+    );
+  });
+
   contract.on(
-    'FallbackAlert',
-    (addr: string, timestamp: bigint, value: bigint) => {
+    EVENT.withdraw,
+    (addr: string, to: string, timestamp: bigint, value: bigint) => {
       console.log(
-        `FallbackAlert: ${addr}, ${new Date(
+        `Withdraw: ${addr}, ${to}, ${new Date(
           Number(timestamp) * 1000
         ).toLocaleString()}, ${ethers.formatEther(value)} ETH`
       );
