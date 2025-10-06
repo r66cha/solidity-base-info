@@ -1,0 +1,37 @@
+import { network } from 'hardhat';
+import { SIMPLE_PAY_ADDRESS } from '../../common/constants.js';
+
+async function main() {
+  const { ethers } = await network.connect({ network: 'localhost' });
+  const [_, acc2] = await ethers.getSigners();
+
+  const contract = await ethers.getContractAt('SimplePay', SIMPLE_PAY_ADDRESS);
+
+  const amountETH = '1.05';
+  const amoutWei = ethers.parseEther(amountETH);
+
+  const tx = await acc2.sendTransaction({
+    to: SIMPLE_PAY_ADDRESS,
+    value: amoutWei,
+  });
+
+  const receipt = await tx.wait();
+
+  if (receipt) {
+    console.log(`TX status: ${receipt?.status}`);
+    for (const log of receipt.logs) {
+      try {
+        const parsed = contract.interface.parseLog(log);
+        if (parsed) {
+          console.log('Event name:', parsed.name);
+          console.log('Args:', parsed.args);
+        }
+      } catch (err) {}
+    }
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});

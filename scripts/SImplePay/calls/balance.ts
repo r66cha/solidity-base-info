@@ -1,5 +1,5 @@
 import { network } from 'hardhat';
-import { SIMPLE_PAY_ADDRESS } from '../../constants.js';
+import { SIMPLE_PAY_ADDRESS } from '../../common/constants.js';
 
 async function main() {
   const { ethers } = await network.connect({ network: 'localhost' });

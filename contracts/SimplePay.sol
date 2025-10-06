@@ -19,6 +19,8 @@ contract SimplePay {
     }
     mapping (address => Payment[]) payments;
 
+    // --
+
     modifier onlyOwner(address _addr) {
         require(_addr == owner, NotAnOwner(_addr));
         _;
@@ -29,6 +31,8 @@ contract SimplePay {
         _;
     }
 
+    // --
+    
     function pay() public payable payAmount(msg.value) {
         payments[msg.sender].push(Payment(block.timestamp, msg.value));
     }
@@ -48,6 +52,8 @@ contract SimplePay {
     function showMyPayments() public view returns(Payment[] memory) {
         return payments[msg.sender];
     }
+
+    // --
 
     receive() external payable {
         emit ReceiverAlert(msg.sender, block.timestamp, msg.value);
