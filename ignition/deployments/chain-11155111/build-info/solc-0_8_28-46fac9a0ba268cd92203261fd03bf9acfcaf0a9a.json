@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-46fac9a0ba268cd92203261fd03bf9acfcaf0a9a",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/SimplePay.sol": "project/contracts/SimplePay.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/SimplePay.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nerror NotAnOwner(address addr);\nerror InvalidPayAmount(uint amount);\n\nevent Pay(address addr, uint timestamp, uint amount);\nevent Withdraw(address addr, address to, uint timestamp, uint amount);\nevent Receive(address addr, string _str);\nevent Fallback(address addr, string _str);\n\ncontract SimplePay {\n    constructor() {\n        owner = msg.sender;\n    }\n\n    address owner;\n    struct Payment {\n        uint timestamp;\n        uint amount;\n    }\n    mapping (address => Payment[]) payments;\n\n    // --\n\n    modifier onlyOwner(address _addr) {\n        require(_addr == owner, NotAnOwner(_addr));\n        _;\n    }\n\n    modifier payAmount(uint _amount) {\n        require(_amount > 0, InvalidPayAmount(_amount));\n        _;\n    }\n\n    // --\n    \n    function pay() public payable payAmount(msg.value) {\n        payments[msg.sender].push(Payment(block.timestamp, msg.value));\n        emit Pay(msg.sender, block.timestamp, msg.value);\n\n    }\n\n    function showBalance() public view returns(uint) {\n        return address(this).balance;\n    }\n    \n    function withdraw(address payable _to) public onlyOwner(msg.sender) {\n        _to.transfer(address(this).balance);\n        emit Withdraw(msg.sender, _to, block.timestamp, address(this).balance);\n\n    }\n\n    function showPayments(address _addr) public view onlyOwner(msg.sender) returns(Payment[] memory){\n        return payments[_addr];\n    }\n\n    function showMyPayments() public view returns(Payment[] memory) {\n        return payments[msg.sender];\n    }\n\n    // --\n\n    receive() external payable {\n        emit Receive(msg.sender, \"*\");\n        pay();\n    }\n\n    fallback() external payable {\n        emit Fallback(msg.sender, \"*\");\n        pay();\n    }\n}"
+      }
+    }
+  }
+}
